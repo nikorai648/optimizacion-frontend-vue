@@ -1,5 +1,4 @@
 // src/api/fakeApi.js
-
 let trabajadores = [
   {
     id: 1,
