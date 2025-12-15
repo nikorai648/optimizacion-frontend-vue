@@ -47,8 +47,9 @@
 <script>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { loginApi } from "@/api/auth";
-import { useAuth } from "@/auth";
+import { loginApi } from "../api/auth";
+import { useAuth } from "../auth";
+
 
 export default {
   name: "LoginView",
