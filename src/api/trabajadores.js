@@ -1,85 +1,66 @@
-// src/api/trabajadores.js
 import { API_URL, getAuthHeaders } from "./config";
 
-// 🔹 Obtener lista de trabajadores
+async function parseJsonSafe(res) {
+  const text = await res.text();
+  try { return text ? JSON.parse(text) : null; } catch { return null; }
+}
+
 export async function getTrabajadores() {
   const res = await fetch(`${API_URL}/api/trabajadores/`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { Accept: "application/json", ...getAuthHeaders() },
   });
 
-  if (!res.ok) {
-    throw new Error("Error al cargar trabajadores");
-  }
-  return res.json();
+  if (res.status === 401) throw Object.assign(new Error("Unauthorized"), { status: 401, data: await parseJsonSafe(res) });
+  if (!res.ok) throw Object.assign(new Error("Error al cargar trabajadores"), { status: res.status, data: await parseJsonSafe(res) });
+
+  return parseJsonSafe(res);
 }
 
-// 🔹 Obtener un trabajador por ID
 export async function getTrabajador(id) {
   const res = await fetch(`${API_URL}/api/trabajadores/${id}/`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { Accept: "application/json", ...getAuthHeaders() },
   });
 
-  if (!res.ok) {
-    throw new Error("Error al cargar trabajador");
-  }
-  return res.json();
+  if (res.status === 401) throw Object.assign(new Error("Unauthorized"), { status: 401, data: await parseJsonSafe(res) });
+  if (!res.ok) throw Object.assign(new Error("Error al cargar trabajador"), { status: res.status, data: await parseJsonSafe(res) });
+
+  return parseJsonSafe(res);
 }
 
-// 🔹 Crear trabajador
 export async function createTrabajador(data) {
   const res = await fetch(`${API_URL}/api/trabajadores/`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { "Content-Type": "application/json", Accept: "application/json", ...getAuthHeaders() },
     body: JSON.stringify(data),
   });
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    console.error("Error creación:", errorData);
-    throw new Error("Error al crear trabajador");
-  }
-  return res.json();
+  if (res.status === 401) throw Object.assign(new Error("Unauthorized"), { status: 401, data: await parseJsonSafe(res) });
+  if (!res.ok) throw Object.assign(new Error("Error al crear trabajador"), { status: res.status, data: await parseJsonSafe(res) });
+
+  return parseJsonSafe(res);
 }
 
-// 🔹 Actualizar trabajador
 export async function updateTrabajador(id, data) {
   const res = await fetch(`${API_URL}/api/trabajadores/${id}/`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { "Content-Type": "application/json", Accept: "application/json", ...getAuthHeaders() },
     body: JSON.stringify(data),
   });
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    console.error("Error actualización:", errorData);
-    throw new Error("Error al actualizar trabajador");
-  }
-  return res.json();
+  if (res.status === 401) throw Object.assign(new Error("Unauthorized"), { status: 401, data: await parseJsonSafe(res) });
+  if (!res.ok) throw Object.assign(new Error("Error al actualizar trabajador"), { status: res.status, data: await parseJsonSafe(res) });
+
+  return parseJsonSafe(res);
 }
 
-// 🔹 Eliminar trabajador
 export async function deleteTrabajador(id) {
   const res = await fetch(`${API_URL}/api/trabajadores/${id}/`, {
     method: "DELETE",
-    headers: {
-      ...getAuthHeaders(),
-    },
+    headers: { Accept: "application/json", ...getAuthHeaders() },
   });
 
-  if (!res.ok) {
-    throw new Error("Error al eliminar trabajador");
-  }
+  if (res.status === 401) throw Object.assign(new Error("Unauthorized"), { status: 401, data: await parseJsonSafe(res) });
+  if (!res.ok) throw Object.assign(new Error("Error al eliminar trabajador"), { status: res.status, data: await parseJsonSafe(res) });
+
   return true;
 }

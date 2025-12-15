@@ -1,85 +1,66 @@
-// src/api/asistencias.js
 import { API_URL, getAuthHeaders } from "./config";
 
-// LISTAR
+async function parseJsonSafe(res) {
+  const text = await res.text();
+  try { return text ? JSON.parse(text) : null; } catch { return null; }
+}
+
 export async function getAsistencias() {
   const res = await fetch(`${API_URL}/api/asistencias/`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { Accept: "application/json", ...getAuthHeaders() },
   });
 
-  if (!res.ok) {
-    throw new Error("Error al cargar asistencias");
-  }
-  return res.json();
+  if (res.status === 401) throw Object.assign(new Error("Unauthorized"), { status: 401, data: await parseJsonSafe(res) });
+  if (!res.ok) throw Object.assign(new Error("Error al cargar asistencias"), { status: res.status, data: await parseJsonSafe(res) });
+
+  return parseJsonSafe(res);
 }
 
-// OBTENER UNA
 export async function getAsistencia(id) {
   const res = await fetch(`${API_URL}/api/asistencias/${id}/`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { Accept: "application/json", ...getAuthHeaders() },
   });
 
-  if (!res.ok) {
-    throw new Error("Error al cargar asistencia");
-  }
-  return res.json();
+  if (res.status === 401) throw Object.assign(new Error("Unauthorized"), { status: 401, data: await parseJsonSafe(res) });
+  if (!res.ok) throw Object.assign(new Error("Error al cargar asistencia"), { status: res.status, data: await parseJsonSafe(res) });
+
+  return parseJsonSafe(res);
 }
 
-// CREAR
 export async function createAsistencia(data) {
   const res = await fetch(`${API_URL}/api/asistencias/`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { "Content-Type": "application/json", Accept: "application/json", ...getAuthHeaders() },
     body: JSON.stringify(data),
   });
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    console.error("Error creación asistencia:", errorData);
-    throw new Error("Error al crear asistencia");
-  }
-  return res.json();
+  if (res.status === 401) throw Object.assign(new Error("Unauthorized"), { status: 401, data: await parseJsonSafe(res) });
+  if (!res.ok) throw Object.assign(new Error("Error al crear asistencia"), { status: res.status, data: await parseJsonSafe(res) });
+
+  return parseJsonSafe(res);
 }
 
-// ACTUALIZAR
 export async function updateAsistencia(id, data) {
   const res = await fetch(`${API_URL}/api/asistencias/${id}/`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { "Content-Type": "application/json", Accept: "application/json", ...getAuthHeaders() },
     body: JSON.stringify(data),
   });
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    console.error("Error actualización asistencia:", errorData);
-    throw new Error("Error al actualizar asistencia");
-  }
-  return res.json();
+  if (res.status === 401) throw Object.assign(new Error("Unauthorized"), { status: 401, data: await parseJsonSafe(res) });
+  if (!res.ok) throw Object.assign(new Error("Error al actualizar asistencia"), { status: res.status, data: await parseJsonSafe(res) });
+
+  return parseJsonSafe(res);
 }
 
-// ELIMINAR
 export async function deleteAsistencia(id) {
   const res = await fetch(`${API_URL}/api/asistencias/${id}/`, {
     method: "DELETE",
-    headers: {
-      ...getAuthHeaders(),
-    },
+    headers: { Accept: "application/json", ...getAuthHeaders() },
   });
 
-  if (!res.ok) {
-    throw new Error("Error al eliminar asistencia");
-  }
+  if (res.status === 401) throw Object.assign(new Error("Unauthorized"), { status: 401, data: await parseJsonSafe(res) });
+  if (!res.ok) throw Object.assign(new Error("Error al eliminar asistencia"), { status: res.status, data: await parseJsonSafe(res) });
+
   return true;
 }

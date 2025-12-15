@@ -1,85 +1,66 @@
-// src/api/eficiencias.js
 import { API_URL, getAuthHeaders } from "./config";
 
-// LISTAR
+async function parseJsonSafe(res) {
+  const text = await res.text();
+  try { return text ? JSON.parse(text) : null; } catch { return null; }
+}
+
 export async function getEficiencias() {
   const res = await fetch(`${API_URL}/api/eficiencias/`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { Accept: "application/json", ...getAuthHeaders() },
   });
 
-  if (!res.ok) {
-    throw new Error("Error al cargar eficiencias");
-  }
-  return res.json();
+  if (res.status === 401) throw Object.assign(new Error("Unauthorized"), { status: 401, data: await parseJsonSafe(res) });
+  if (!res.ok) throw Object.assign(new Error("Error al cargar eficiencias"), { status: res.status, data: await parseJsonSafe(res) });
+
+  return parseJsonSafe(res);
 }
 
-// OBTENER UNA
 export async function getEficiencia(id) {
   const res = await fetch(`${API_URL}/api/eficiencias/${id}/`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { Accept: "application/json", ...getAuthHeaders() },
   });
 
-  if (!res.ok) {
-    throw new Error("Error al cargar eficiencia");
-  }
-  return res.json();
+  if (res.status === 401) throw Object.assign(new Error("Unauthorized"), { status: 401, data: await parseJsonSafe(res) });
+  if (!res.ok) throw Object.assign(new Error("Error al cargar eficiencia"), { status: res.status, data: await parseJsonSafe(res) });
+
+  return parseJsonSafe(res);
 }
 
-// CREAR
 export async function createEficiencia(data) {
   const res = await fetch(`${API_URL}/api/eficiencias/`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { "Content-Type": "application/json", Accept: "application/json", ...getAuthHeaders() },
     body: JSON.stringify(data),
   });
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    console.error("Error creación eficiencia:", errorData);
-    throw new Error("Error al crear eficiencia");
-  }
-  return res.json();
+  if (res.status === 401) throw Object.assign(new Error("Unauthorized"), { status: 401, data: await parseJsonSafe(res) });
+  if (!res.ok) throw Object.assign(new Error("Error al crear eficiencia"), { status: res.status, data: await parseJsonSafe(res) });
+
+  return parseJsonSafe(res);
 }
 
-// ACTUALIZAR
 export async function updateEficiencia(id, data) {
   const res = await fetch(`${API_URL}/api/eficiencias/${id}/`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
+    headers: { "Content-Type": "application/json", Accept: "application/json", ...getAuthHeaders() },
     body: JSON.stringify(data),
   });
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    console.error("Error actualización eficiencia:", errorData);
-    throw new Error("Error al actualizar eficiencia");
-  }
-  return res.json();
+  if (res.status === 401) throw Object.assign(new Error("Unauthorized"), { status: 401, data: await parseJsonSafe(res) });
+  if (!res.ok) throw Object.assign(new Error("Error al actualizar eficiencia"), { status: res.status, data: await parseJsonSafe(res) });
+
+  return parseJsonSafe(res);
 }
 
-// ELIMINAR
 export async function deleteEficiencia(id) {
   const res = await fetch(`${API_URL}/api/eficiencias/${id}/`, {
     method: "DELETE",
-    headers: {
-      ...getAuthHeaders(),
-    },
+    headers: { Accept: "application/json", ...getAuthHeaders() },
   });
 
-  if (!res.ok) {
-    throw new Error("Error al eliminar eficiencia");
-  }
+  if (res.status === 401) throw Object.assign(new Error("Unauthorized"), { status: 401, data: await parseJsonSafe(res) });
+  if (!res.ok) throw Object.assign(new Error("Error al eliminar eficiencia"), { status: res.status, data: await parseJsonSafe(res) });
+
   return true;
 }
