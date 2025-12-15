@@ -23,16 +23,16 @@
           <td>{{ t.turno }}</td>
           <td>{{ t.tipo }}</td>
           <td>
-            <RouterLink
-              class="btn btn-sm btn-link"
-              :to="`/trabajadores/${t.id}`"
-            >
+            <RouterLink class="btn btn-sm btn-link" :to="`/trabajadores/${t.id}`">
               Editar
             </RouterLink>
             <button class="btn btn-sm btn-danger" @click="remove(t.id)">
               Eliminar
             </button>
           </td>
+        </tr>
+        <tr v-if="trabajadores.length === 0">
+          <td colspan="5">No hay trabajadores registrados.</td>
         </tr>
       </tbody>
     </table>
@@ -43,23 +43,29 @@
 
 <script>
 import { ref, onMounted } from "vue";
-import { RouterLink } from "vue-router";
-import {
-  getTrabajadores,
-  deleteTrabajador,
-} from "../api/trabajadores";
+import { RouterLink, useRouter } from "vue-router";
+import { getTrabajadores, deleteTrabajador } from "../api/trabajadores";
 
 export default {
   components: { RouterLink },
   setup() {
+    const router = useRouter();
     const trabajadores = ref([]);
     const error = ref("");
 
+    const handle401 = () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("username");
+      router.push("/login");
+    };
+
     const cargar = async () => {
+      error.value = "";
       try {
         trabajadores.value = await getTrabajadores();
       } catch (e) {
-        error.value = "Error al cargar trabajadores";
+        if (e?.status === 401) return handle401();
+        error.value = e?.message || "Error al cargar trabajadores";
       }
     };
 
@@ -69,7 +75,8 @@ export default {
         await deleteTrabajador(id);
         await cargar();
       } catch (e) {
-        error.value = "Error al eliminar trabajador";
+        if (e?.status === 401) return handle401();
+        error.value = e?.message || "Error al eliminar trabajador";
       }
     };
 
