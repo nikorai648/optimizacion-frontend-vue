@@ -1,75 +1,66 @@
-<!-- src/views/EficienciaListView.vue -->
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import {
-  getEficiencias,
-  deleteEficiencia,
-} from "../api/eficiencias";
+import { getEficiencias, deleteEficiencia } from "../api/eficiencias";
 
 const router = useRouter();
-
 const eficiencias = ref([]);
 const loading = ref(true);
 const error = ref("");
 
-const cargarEficiencias = async () => {
+const handle401 = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("username");
+  router.push("/login");
+};
+
+const cargar = async () => {
   loading.value = true;
   error.value = "";
-
   try {
     eficiencias.value = await getEficiencias();
   } catch (e) {
-    console.error(e);
-    error.value = e.message || "Error al cargar eficiencias";
+    if (e?.status === 401) return handle401();
+    error.value = e?.message || "Error al cargar eficiencias";
   } finally {
     loading.value = false;
   }
 };
 
-const irNuevo = () => {
-  router.push("/eficiencias/nueva");
-};
-
-const irEditar = (id) => {
-  router.push(`/eficiencias/${id}`);
-};
+const irNuevo = () => router.push("/eficiencias/nueva");
+const irEditar = (id) => router.push(`/eficiencias/${id}`);
 
 const eliminar = async (id) => {
-  if (!confirm("¿Seguro que deseas eliminar esta eficiencia?")) return;
-
+  if (!confirm("¿Eliminar eficiencia?")) return;
   try {
     await deleteEficiencia(id);
     eficiencias.value = eficiencias.value.filter((e) => e.id !== id);
   } catch (e) {
-    console.error(e);
-    alert("No se pudo eliminar la eficiencia");
+    if (e?.status === 401) return handle401();
+    alert(e?.message || "No se pudo eliminar la eficiencia");
   }
 };
 
-onMounted(cargarEficiencias);
+onMounted(cargar);
 </script>
 
 <template>
   <div class="container mt-4">
     <h3>Eficiencia de Trabajadores</h3>
 
-    <button class="btn btn-primary mb-3" @click="irNuevo">
-      Nueva Eficiencia
-    </button>
+    <button class="btn btn-primary mb-3" @click="irNuevo">Nueva</button>
 
     <div v-if="loading">Cargando eficiencias...</div>
-    <div v-else-if="error" class="alert alert-danger">
-      {{ error }}
-    </div>
+    <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
+
     <table v-else class="table table-sm table-striped">
       <thead>
         <tr>
           <th>RUT</th>
           <th>Nombre</th>
-          <th>ID Eficiencia</th>
-          <th>Trabajos completados (1 mes)</th>
-          <th>Sueldo promedio informado</th>
+          <th>ID</th>
+          <th>Trabajos (1 mes)</th>
+          <th>Sueldo promedio</th>
           <th></th>
         </tr>
       </thead>
@@ -81,18 +72,8 @@ onMounted(cargarEficiencias);
           <td>{{ e.trabajos_completados_en_1_mes }}</td>
           <td>{{ e.sueldo_promedio_informado }}</td>
           <td>
-            <button
-              class="btn btn-link btn-sm"
-              @click="irEditar(e.id)"
-            >
-              Editar
-            </button>
-            <button
-              class="btn btn-danger btn-sm"
-              @click="eliminar(e.id)"
-            >
-              Eliminar
-            </button>
+            <button class="btn btn-link btn-sm" @click="irEditar(e.id)">Editar</button>
+            <button class="btn btn-danger btn-sm" @click="eliminar(e.id)">Eliminar</button>
           </td>
         </tr>
         <tr v-if="eficiencias.length === 0">

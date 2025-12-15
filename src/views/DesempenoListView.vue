@@ -1,26 +1,19 @@
-<!-- src/views/DesempenoListView.vue -->
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import {
-  getDesempenos,
-  deleteDesempeno,
-} from "../api/desempenos";
+import { getDesempenos, deleteDesempeno } from "../api/desempenos";
 
 const router = useRouter();
-
 const desempenos = ref([]);
 const loading = ref(true);
 const error = ref("");
 
-const cargarDesempenos = async () => {
+const cargar = async () => {
   loading.value = true;
   error.value = "";
-
   try {
     desempenos.value = await getDesempenos();
   } catch (e) {
-    console.error(e);
     error.value = e.message || "Error al cargar desempeños";
   } finally {
     loading.value = false;
@@ -37,17 +30,15 @@ const irEditar = (id) => {
 
 const eliminar = async (id) => {
   if (!confirm("¿Seguro que deseas eliminar este desempeño?")) return;
-
   try {
     await deleteDesempeno(id);
     desempenos.value = desempenos.value.filter((d) => d.id !== id);
   } catch (e) {
-    console.error(e);
     alert("No se pudo eliminar el desempeño");
   }
 };
 
-onMounted(cargarDesempenos);
+onMounted(cargar);
 </script>
 
 <template>
@@ -59,9 +50,7 @@ onMounted(cargarDesempenos);
     </button>
 
     <div v-if="loading">Cargando desempeños...</div>
-    <div v-else-if="error" class="alert alert-danger">
-      {{ error }}
-    </div>
+    <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
 
     <table v-else class="table table-sm table-striped">
       <thead>
@@ -69,8 +58,8 @@ onMounted(cargarDesempenos);
           <th>RUT</th>
           <th>Nombre</th>
           <th>ID Desempeño</th>
-          <th>Forma de hacer trabajos</th>
-          <th>Posibles quejas</th>
+          <th>Forma de trabajo</th>
+          <th>Quejas</th>
           <th></th>
         </tr>
       </thead>
