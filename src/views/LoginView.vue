@@ -64,18 +64,20 @@ export default {
       try {
         const data = await loginApi(username.value, password.value);
 
-        // Guardar sesión
+        // data debe venir así: { token: "xxxxx" }
+        if (!data?.token) {
+          throw new Error("No vino token desde el backend");
+        }
+
         auth.login(username.value, data.token);
 
-        // Redirigir
+        // redirige donde quieras
         router.push("/");
       } catch (e) {
-        // Si tu loginApi tira status, esto quedará perfecto:
-        if (e?.status === 400 || e?.status === 401) {
-          error.value = "Credenciales inválidas.";
-        } else {
-          error.value = "Servidor no disponible o error de red.";
-        }
+        console.error(e);
+        error.value =
+          e?.data?.detail ||
+          "Credenciales inválidas o servidor no disponible.";
       } finally {
         loading.value = false;
       }
