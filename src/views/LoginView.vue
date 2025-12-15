@@ -4,7 +4,6 @@
       <div class="col-md-4">
         <h3 class="text-center mb-4">Ingreso (API Django)</h3>
 
-        <!-- Mensaje de error -->
         <div v-if="error" class="alert alert-danger">
           {{ error }}
         </div>
@@ -32,10 +31,7 @@
             />
           </div>
 
-          <button
-            class="btn btn-primary w-100"
-            :disabled="loading"
-          >
+          <button class="btn btn-primary w-100" :disabled="loading">
             {{ loading ? "Ingresando..." : "Entrar" }}
           </button>
         </form>
@@ -49,7 +45,6 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { loginApi } from "../api/auth";
 import { useAuth } from "../auth";
-
 
 export default {
   name: "LoginView",
@@ -67,16 +62,20 @@ export default {
       loading.value = true;
 
       try {
-        // 1️⃣ Login contra Django REST
         const data = await loginApi(username.value, password.value);
 
-        // 2️⃣ Guardar sesión (token + usuario)
+        // Guardar sesión
         auth.login(username.value, data.token);
 
-        // 3️⃣ Redirección
+        // Redirigir
         router.push("/");
       } catch (e) {
-        error.value = "Credenciales inválidas o servidor no disponible.";
+        // Si tu loginApi tira status, esto quedará perfecto:
+        if (e?.status === 400 || e?.status === 401) {
+          error.value = "Credenciales inválidas.";
+        } else {
+          error.value = "Servidor no disponible o error de red.";
+        }
       } finally {
         loading.value = false;
       }
