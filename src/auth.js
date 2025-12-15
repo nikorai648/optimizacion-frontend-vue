@@ -2,8 +2,8 @@
 import { reactive } from "vue";
 
 const state = reactive({
-  isAuthenticated: true, // por ahora lo dejamos siempre logueado
-  username: localStorage.getItem("username") || "admin",
+  isAuthenticated: !!localStorage.getItem("token"),
+  username: localStorage.getItem("username") || null,
   token: localStorage.getItem("token") || null,
 });
 
@@ -12,12 +12,12 @@ function login(username, token) {
   state.username = username;
   state.token = token;
   localStorage.setItem("username", username);
-  if (token) localStorage.setItem("token", token);
+  localStorage.setItem("token", token);
 }
 
 function logout() {
   state.isAuthenticated = false;
-  state.username = "";
+  state.username = null;
   state.token = null;
   localStorage.removeItem("username");
   localStorage.removeItem("token");
