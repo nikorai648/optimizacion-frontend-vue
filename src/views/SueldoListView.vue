@@ -1,6 +1,54 @@
+<script setup>
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { getSueldos, deleteSueldo } from "../api/sueldos";
+
+const router = useRouter();
+
+const sueldos = ref([]);     // ✅
+const loading = ref(true);  // ✅
+const error = ref("");      // ✅
+
+function handle401() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("username");
+  router.push("/login");
+}
+
+const cargar = async () => {
+  loading.value = true;
+  error.value = "";
+  try {
+    const data = await getSueldos();
+    sueldos.value = Array.isArray(data) ? data : [];
+  } catch (e) {
+    if (e?.status === 401) return handle401();
+    error.value = e?.message || "Error al cargar sueldos";
+    sueldos.value = [];
+  } finally {
+    loading.value = false;
+  }
+};
+
+const irNuevo = () => router.push("/sueldos/nuevo");
+const irEditar = (id) => router.push(`/sueldos/${id}`);
+
+const eliminar = async (id) => {
+  if (!confirm("¿Eliminar sueldo?")) return;
+  try {
+    await deleteSueldo(id);
+    sueldos.value = sueldos.value.filter((s) => s.id !== id);
+  } catch (e) {
+    if (e?.status === 401) return handle401();
+    alert(e?.message || "No se pudo eliminar");
+  }
+};
+
+onMounted(cargar);
+</script>
+
 <template>
   <div class="container mt-4">
-
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div class="d-flex align-items-center gap-2">
         <img src="/img/sueldo.webp" class="icono-listado" alt="Sueldos" />
@@ -20,7 +68,7 @@
           <th>Mes</th>
           <th>Trabajos</th>
           <th>Total</th>
-          <th class="text-end"></th>
+          <th class="text-end">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -36,7 +84,7 @@
           </td>
         </tr>
         <tr v-if="sueldos.length === 0">
-          <td colspan="6">Sin registros</td>
+          <td colspan="6" class="text-center">Sin registros</td>
         </tr>
       </tbody>
     </table>

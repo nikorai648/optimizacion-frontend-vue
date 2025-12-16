@@ -1,9 +1,61 @@
+<script setup>
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { getEficiencias, deleteEficiencia } from "../api/eficiencias";
+
+const router = useRouter();
+
+/* ✅ VARIABLES DEFINIDAS */
+const eficiencias = ref([]);
+const loading = ref(true);
+const error = ref("");
+
+const handle401 = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("username");
+  router.push("/login");
+};
+
+const cargar = async () => {
+  loading.value = true;
+  error.value = "";
+
+  try {
+    const data = await getEficiencias();
+    eficiencias.value = Array.isArray(data) ? data : [];
+  } catch (e) {
+    if (e?.status === 401) return handle401();
+    error.value = e?.message || "Error al cargar eficiencias";
+    eficiencias.value = [];
+  } finally {
+    loading.value = false;
+  }
+};
+
+const irNuevo = () => router.push("/eficiencias/nueva");
+const irEditar = (id) => router.push(`/eficiencias/${id}`);
+
+const eliminar = async (id) => {
+  if (!confirm("¿Eliminar eficiencia?")) return;
+
+  try {
+    await deleteEficiencia(id);
+    eficiencias.value = eficiencias.value.filter((e) => e.id !== id);
+  } catch (e) {
+    if (e?.status === 401) return handle401();
+    alert(e?.message || "No se pudo eliminar la eficiencia");
+  }
+};
+
+onMounted(cargar);
+</script>
+
 <template>
   <div class="container mt-4">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div class="d-flex align-items-center gap-2">
-        <img src="/img/eficiencia.jpg" class="icono-listado" alt="Eficiencia" />
+        <img src="/img/eficiencia.jpeg" class="icono-listado" alt="Eficiencia" />
         <h3 class="mb-0">Eficiencia de Trabajadores</h3>
       </div>
       <button class="btn btn-primary" @click="irNuevo">Nuevo</button>
@@ -20,7 +72,7 @@
           <th>ID</th>
           <th>Trabajos</th>
           <th>Sueldo Prom.</th>
-          <th class="text-end"></th>
+          <th class="text-end">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -31,12 +83,17 @@
           <td>{{ e.trabajos_completados_en_1_mes }}</td>
           <td>{{ e.sueldo_promedio_informado }}</td>
           <td class="text-end">
-            <button class="btn btn-sm btn-secondary me-2" @click="irEditar(e.id)">Editar</button>
-            <button class="btn btn-sm btn-danger" @click="eliminar(e.id)">Eliminar</button>
+            <button class="btn btn-sm btn-secondary me-2" @click="irEditar(e.id)">
+              Editar
+            </button>
+            <button class="btn btn-sm btn-danger" @click="eliminar(e.id)">
+              Eliminar
+            </button>
           </td>
         </tr>
+
         <tr v-if="eficiencias.length === 0">
-          <td colspan="6">Sin registros</td>
+          <td colspan="6" class="text-center">Sin registros</td>
         </tr>
       </tbody>
     </table>

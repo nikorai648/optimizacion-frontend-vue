@@ -1,6 +1,46 @@
+<script setup>
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { getDesempenos, deleteDesempeno } from "../api/desempenos";
+
+const router = useRouter();
+
+const desempenos = ref([]);   // ✅
+const loading = ref(true);    // ✅
+const error = ref("");        // ✅
+
+const cargar = async () => {
+  loading.value = true;
+  error.value = "";
+  try {
+    const data = await getDesempenos();
+    desempenos.value = Array.isArray(data) ? data : [];
+  } catch (e) {
+    error.value = e?.message || "Error al cargar desempeños";
+    desempenos.value = [];
+  } finally {
+    loading.value = false;
+  }
+};
+
+const irNuevo = () => router.push("/desempenos/nuevo");
+const irEditar = (id) => router.push(`/desempenos/${id}`);
+
+const eliminar = async (id) => {
+  if (!confirm("¿Eliminar desempeño?")) return;
+  try {
+    await deleteDesempeno(id);
+    desempenos.value = desempenos.value.filter((d) => d.id !== id);
+  } catch {
+    alert("No se pudo eliminar");
+  }
+};
+
+onMounted(cargar);
+</script>
+
 <template>
   <div class="container mt-4">
-
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div class="d-flex align-items-center gap-2">
         <img src="/img/desempeno.jpg" class="icono-listado" alt="Desempeño" />
@@ -19,7 +59,7 @@
           <th>Nombre</th>
           <th>ID</th>
           <th>Quejas</th>
-          <th class="text-end"></th>
+          <th class="text-end">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -34,7 +74,7 @@
           </td>
         </tr>
         <tr v-if="desempenos.length === 0">
-          <td colspan="5">Sin registros</td>
+          <td colspan="5" class="text-center">Sin registros</td>
         </tr>
       </tbody>
     </table>
