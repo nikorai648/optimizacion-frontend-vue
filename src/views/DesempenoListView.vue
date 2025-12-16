@@ -1,53 +1,13 @@
-<script setup>
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { getDesempenos, deleteDesempeno } from "../api/desempenos";
-
-const router = useRouter();
-const desempenos = ref([]);
-const loading = ref(true);
-const error = ref("");
-
-const cargar = async () => {
-  loading.value = true;
-  error.value = "";
-  try {
-    desempenos.value = await getDesempenos();
-  } catch (e) {
-    error.value = e.message || "Error al cargar desempeños";
-  } finally {
-    loading.value = false;
-  }
-};
-
-const irNuevo = () => {
-  router.push("/desempenos/nuevo");
-};
-
-const irEditar = (id) => {
-  router.push(`/desempenos/${id}`);
-};
-
-const eliminar = async (id) => {
-  if (!confirm("¿Seguro que deseas eliminar este desempeño?")) return;
-  try {
-    await deleteDesempeno(id);
-    desempenos.value = desempenos.value.filter((d) => d.id !== id);
-  } catch (e) {
-    alert("No se pudo eliminar el desempeño");
-  }
-};
-
-onMounted(cargar);
-</script>
-
 <template>
   <div class="container mt-4">
-    <h3>Desempeño de Trabajadores</h3>
 
-    <button class="btn btn-primary mb-3" @click="irNuevo">
-      Nuevo Desempeño
-    </button>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="d-flex align-items-center gap-2">
+        <img src="/img/desempeno.jpg" class="icono-listado" alt="Desempeño" />
+        <h3 class="mb-0">Desempeño de Trabajadores</h3>
+      </div>
+      <button class="btn btn-primary" @click="irNuevo">Nuevo</button>
+    </div>
 
     <div v-if="loading">Cargando desempeños...</div>
     <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
@@ -57,10 +17,9 @@ onMounted(cargar);
         <tr>
           <th>RUT</th>
           <th>Nombre</th>
-          <th>ID Desempeño</th>
-          <th>Forma de trabajo</th>
+          <th>ID</th>
           <th>Quejas</th>
-          <th></th>
+          <th class="text-end"></th>
         </tr>
       </thead>
       <tbody>
@@ -68,19 +27,14 @@ onMounted(cargar);
           <td>{{ d.trabajador_rut }}</td>
           <td>{{ d.trabajador_nombre }}</td>
           <td>{{ d.id_desempeno }}</td>
-          <td>{{ d.forma_de_hacer_trabajos }}</td>
-          <td>{{ d.posibles_quejas }}</td>
-          <td>
-            <button class="btn btn-link btn-sm" @click="irEditar(d.id)">
-              Editar
-            </button>
-            <button class="btn btn-danger btn-sm" @click="eliminar(d.id)">
-              Eliminar
-            </button>
+          <td>{{ d.posibles_quejas || "-" }}</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-secondary me-2" @click="irEditar(d.id)">Editar</button>
+            <button class="btn btn-sm btn-danger" @click="eliminar(d.id)">Eliminar</button>
           </td>
         </tr>
         <tr v-if="desempenos.length === 0">
-          <td colspan="6">No hay desempeños registrados.</td>
+          <td colspan="5">Sin registros</td>
         </tr>
       </tbody>
     </table>

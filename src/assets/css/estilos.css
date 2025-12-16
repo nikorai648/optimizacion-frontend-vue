@@ -1,9 +1,18 @@
+/* Fondo general */
 body {
   background:
-    linear-gradient(rgba(245, 245, 245, 0.92), rgba(245, 245, 245, 0.92)),
+    linear-gradient(rgba(245,245,245,0.92), rgba(245,245,245,0.92)),
     url("/img/fondo.jpg");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  font-family: Arial, sans-serif;
+}
+
+/* Iconos de listado (como Django templates) */
+.icono-listado {
+  width: 46px;
+  height: 46px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.15);
 }

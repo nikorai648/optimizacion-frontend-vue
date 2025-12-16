@@ -1,10 +1,17 @@
 <template>
   <div class="container mt-4">
-    <h3>Trabajadores</h3>
 
-    <RouterLink class="btn btn-primary mb-3" to="/trabajadores/nuevo">
-      Nuevo
-    </RouterLink>
+    <!-- HEADER con imagen + título + botón -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="d-flex align-items-center gap-2">
+        <img src="/img/trabajador.jpg" class="icono-listado" alt="Trabajadores" />
+        <h3 class="mb-0">Trabajadores</h3>
+      </div>
+
+      <RouterLink class="btn btn-primary" to="/trabajadores/nuevo">
+        Nuevo
+      </RouterLink>
+    </div>
 
     <table class="table table-striped">
       <thead>
@@ -13,7 +20,7 @@
           <th>Nombre</th>
           <th>Turno</th>
           <th>Tipo</th>
-          <th></th>
+          <th class="text-end">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -22,8 +29,8 @@
           <td>{{ t.nombre }} {{ t.apellido }}</td>
           <td>{{ t.turno }}</td>
           <td>{{ t.tipo }}</td>
-          <td>
-            <RouterLink class="btn btn-sm btn-link" :to="`/trabajadores/${t.id}`">
+          <td class="text-end">
+            <RouterLink class="btn btn-sm btn-secondary me-2" :to="`/trabajadores/${t.id}`">
               Editar
             </RouterLink>
             <button class="btn btn-sm btn-danger" @click="remove(t.id)">
@@ -31,6 +38,7 @@
             </button>
           </td>
         </tr>
+
         <tr v-if="trabajadores.length === 0">
           <td colspan="5">No hay trabajadores registrados.</td>
         </tr>
@@ -81,7 +89,6 @@ export default {
     };
 
     onMounted(cargar);
-
     return { trabajadores, error, remove };
   },
 };
